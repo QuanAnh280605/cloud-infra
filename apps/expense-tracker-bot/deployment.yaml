@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expense-bot
+  namespace: expense-tracker
+  labels:
+    app: expense-bot
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # Đảm bảo pod cũ dừng hẳn trước khi pod mới chạy để bảo toàn file SQLite
+  selector:
+    matchLabels:
+      app: expense-bot
+  template:
+    metadata:
+      labels:
+        app: expense-bot
+    spec:
+      containers:
+        - name: bot
+          image: ghcr.io/quananh280605/expense-tracker-bot:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: expense-bot-config
+            - secretRef:
+                name: expense-bot-secret
+          volumeMounts:
+            - name: bot-data
+              mountPath: /app/data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+      volumes:
+        - name: bot-data
+          persistentVolumeClaim:
+            claimName: expense-bot-pvc

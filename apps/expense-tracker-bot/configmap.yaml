@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: expense-bot-config
+  namespace: expense-tracker
+data:
+  GROQ_MODEL: "llama-3.3-70b-versatile"
+  DB_PATH: "/app/data/expense_tracker.db"
+  REMINDER_HOUR: "22"
+  REMINDER_MINUTE: "0"
