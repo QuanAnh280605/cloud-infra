@@ -1,0 +1,21 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-backend-ingress
+  namespace: my-app
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+    # Cách 1: Định tuyến theo Domain / Subdomain riêng (Khuyên dùng)
+    # Trỏ record A của domain về IP VPS 140.245.58.162
+    - host: api2.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-backend-service
+                port:
+                  number: 8000

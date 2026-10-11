@@ -1,0 +1,19 @@
+﻿# Terraform local state and plugins
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!terraform.tfvars.example
+
+# Credentials & Keys
+*.key
+*.pem
+.env
+.env.*
+!.env.example
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

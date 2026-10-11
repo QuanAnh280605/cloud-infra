@@ -1,0 +1,37 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-backend
+  namespace: my-app # Thay bằng tên namespace dự án của bạn (ví dụ: project-b)
+  labels:
+    app: my-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-backend
+  template:
+    metadata:
+      labels:
+        app: my-backend
+    spec:
+      containers:
+        - name: backend
+          # Thay bằng Docker image của bạn trên GHCR hoặc Docker Hub (nhớ build multi-arch hoặc arm64)
+          image: ghcr.io/your-username/my-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: my-backend-config
+            - secretRef:
+                name: my-backend-secret
+                optional: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
