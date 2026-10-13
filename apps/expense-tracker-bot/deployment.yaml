@@ -21,6 +21,9 @@ spec:
         - name: bot
           image: ghcr.io/quananh280605/expense-tracker-bot:latest
           imagePullPolicy: Always
+          env:
+            - name: DB_PATH
+              value: "/app/data/expense_tracker.db"
           envFrom:
             - configMapRef:
                 name: expense-bot-config
