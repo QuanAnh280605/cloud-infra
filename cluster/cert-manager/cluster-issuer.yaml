@@ -1,0 +1,39 @@
+# ==============================================================================
+# ClusterIssuer Cho Cert-Manager (Tự động cấp phát SSL Let's Encrypt miễn phí)
+# ==============================================================================
+
+# 1. Staging Issuer (Dùng để kiểm thử kết nối, tránh bị Let's Encrypt Rate Limit)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    # Server thử nghiệm của Let's Encrypt
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: admin@yourdomain.com # Thay đổi thành email của bạn
+    privateKeySecretRef:
+      name: letsencrypt-staging-key
+    solvers:
+      - http01:
+          ingress:
+            class: traefik # Mặc định trên K3s dùng Traefik Ingress Controller
+
+---
+
+# 2. Production Issuer (Dùng cấp chứng chỉ SSL HTTPS thật)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # Server chính thức của Let's Encrypt
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@yourdomain.com # Thay đổi thành email của bạn
+    privateKeySecretRef:
+      name: letsencrypt-prod-key
+    solvers:
+      - http01:
+          ingress:
+            class: traefik # Mặc định trên K3s dùng Traefik Ingress Controller
