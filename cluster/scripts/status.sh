@@ -59,8 +59,15 @@ echo -e "\n${BOLD}${GREEN}6. 🌐 Ingress & Routing${NC}"
 echo "--------------------------------------------------"
 kubectl get ingress -A 2>/dev/null || echo "Chưa có Ingress nào."
 
-# 7. METRICS TIÊU THỤ TÀI NGUYÊN (NẾU METRICS-SERVER KHẢ DỤNG)
-echo -e "\n${BOLD}${GREEN}7. 📊 Tiêu Thụ Tài Nguyên Pod (CPU / RAM)${NC}"
+# 7. TRẠNG THÁI GITOPS ARGOCD
+if kubectl get applications -n argocd &>/dev/null; then
+    echo -e "\n${BOLD}${GREEN}7. 🐙 Ứng Dụng Quản Lý Bởi ArgoCD (GitOps)${NC}"
+    echo "--------------------------------------------------"
+    kubectl get applications -n argocd
+fi
+
+# 8. METRICS TIÊU THỤ TÀI NGUYÊN (NẾU METRICS-SERVER KHẢ DỤNG)
+echo -e "\n${BOLD}${GREEN}8. 📊 Tiêu Thụ Tài Nguyên Pod (CPU / RAM)${NC}"
 echo "--------------------------------------------------"
 if kubectl top pods -A &>/dev/null; then
     kubectl top pods -A

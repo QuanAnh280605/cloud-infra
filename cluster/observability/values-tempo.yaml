@@ -1,0 +1,42 @@
+# ==============================================================================
+# Tempo Helm Values (Optimized for Single-Node K3s ARM64 - Oracle Cloud VPS)
+# Architecture: SingleBinary, Local Storage, 48-Hour Retention
+# ==============================================================================
+
+tempo:
+  extraArgs: {}
+  resources:
+    limits:
+      cpu: 250m
+      memory: 384Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+  receivers:
+    jaeger:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:14250
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+
+  retention: 48h # 2 days retention for distributed traces
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 4Gi
