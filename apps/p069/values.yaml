@@ -40,11 +40,8 @@ backend:
   image:
     repository: xsp.ocir.io/ax2il7nx7xmg/p069-backend
     tag: latest
-  replicaCount: 2
-  image:
-    repository: p069-backend
-    tag: latest
     pullPolicy: IfNotPresent
+  replicaCount: 2
   port: 8000
   corsOrigins: "*"
   secrets:
@@ -66,11 +63,8 @@ frontend:
   image:
     repository: xsp.ocir.io/ax2il7nx7xmg/p069-frontend
     tag: latest
-  replicaCount: 1
-  image:
-    repository: p069-frontend
-    tag: latest
     pullPolicy: IfNotPresent
+  replicaCount: 1
   port: 8080
   resources:
     requests:
