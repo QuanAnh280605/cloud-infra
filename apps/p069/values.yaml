@@ -3,7 +3,8 @@
 global:
   appEnv: production
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: ocir-secret
 
 # --- PostgreSQL Configuration ---
 postgres:
@@ -36,6 +37,9 @@ redis:
 
 # --- FastAPI Backend Configuration ---
 backend:
+  image:
+    repository: xsp.ocir.io/ax2il7nx7xmg/p069-backend
+    tag: latest
   replicaCount: 2
   image:
     repository: p069-backend
@@ -59,6 +63,9 @@ backend:
 
 # --- Next.js Frontend Configuration ---
 frontend:
+  image:
+    repository: xsp.ocir.io/ax2il7nx7xmg/p069-frontend
+    tag: latest
   replicaCount: 1
   image:
     repository: p069-frontend
