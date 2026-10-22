@@ -1,0 +1,81 @@
+# ==============================================================================
+# ArgoCD Helm Values (Optimized for Single-Node K3s ARM64 - Oracle Cloud VPS)
+# ==============================================================================
+
+global:
+  domain: argocd.140.245.58.162.nip.io
+
+configs:
+  params:
+    # Cho phép Argo CD server chạy HTTP đằng sau Ingress / Reverse Proxy
+    server.insecure: true
+
+# Tắt Dex SSO để tiết kiệm ~100MB RAM (chỉ dùng tài khoản admin local)
+dex:
+  enabled: false
+
+# Tắt Notifications controller nếu chưa cấu hình webhook để tiết kiệm ~100MB RAM
+notifications:
+  enabled: false
+
+# Redis đơn (Non-HA)
+redis:
+  enabled: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+# Argo CD Web UI & API Server
+server:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 20m
+      memory: 64Mi
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: argocd.140.245.58.162.nip.io
+    path: /
+    pathType: Prefix
+
+# Application Controller (Core Reconcile Engine)
+controller:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 300m
+      memory: 384Mi
+    requests:
+      cpu: 30m
+      memory: 128Mi
+
+# Repo Server (Clone Git & Render Helm / Manifests)
+repoServer:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 30m
+      memory: 64Mi
+
+# ApplicationSet Controller
+applicationSet:
+  enabled: true
+  replicas: 1
+  resources:
+    limits:
+      cpu: 150m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
