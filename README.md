@@ -31,23 +31,9 @@ cloud-infra/
 │   └── scripts/              # Bộ công cụ vận hành hàng ngày (Ops Tools)
 │       ├── status.sh         # Kiểm tra chi tiết RAM, CPU, SSD 47GB, Nodes & Pods
 │       ├── maintenance.sh    # Dọn dẹp images rác & logs cũ chống đầy đĩa
-│       └── backup.sh         # Tự động sao lưu PostgreSQL (p069) & SQLite (bot)
+│       └── backup.sh         # Tự động sao lưu cơ sở dữ liệu các ứng dụng
 │
 └── apps/                     # Quản lý các dự án triển khai trên VPS
-    ├── p069/                 # Ứng dụng P-069 AI Semantic Layer (Helm Chart & k8s-raw)
-    │   ├── Chart.yaml
-    │   ├── values.yaml
-    │   ├── deploy.sh         # Script deploy 1-click cho p069
-    │   ├── namespace.yaml
-    │   ├── templates/        # Helm templates
-    │   └── k8s-raw/          # Manifests thuần cho học tập & debug
-    │
-    ├── expense-tracker-bot/  # Bot Telegram Quản Lý Thu Chi Cá Nhân
-    │   ├── deployment.yaml   # Strategy Recreate (Bảo vệ SQLite)
-    │   ├── pvc.yaml          # Local-path volume 1GB
-    │   ├── deploy.sh         # Script deploy 1-click cho Bot
-    │   └── README.md
-    │
     └── _template-backend/    # ⚡ MẪU CẮM BACKEND MỚI (Copy thư mục này để tạo app mới)
         ├── deployment.yaml
         ├── service.yaml
@@ -75,9 +61,9 @@ cloud-infra/
 |---|---|---|
 | **Kiểm tra sức khỏe hệ thống** | `./cluster/scripts/status.sh` | Xem RAM, CPU, ổ đĩa 47GB, Pods & PVC |
 | **Dọn dẹp ổ đĩa định kỳ** | `./cluster/scripts/maintenance.sh` | Xóa container image rác & journal log cũ |
-| **Sao lưu dữ liệu (Backup)** | `./cluster/scripts/backup.sh` | Dump Postgres & SQLite thành `.tar.gz` |
+| **Sao lưu dữ liệu (Backup)** | `./cluster/scripts/backup.sh` | Dump cơ sở dữ liệu các ứng dụng thành `.tar.gz` |
 | **Bật SSL HTTPS tự động** | `cd cluster/cert-manager && ./install.sh` | Kích hoạt Cert-Manager & Let's Encrypt |
-| **Deploy toàn bộ ứng dụng** | `./cluster/deploy-all.sh` | Cập nhật p069 và expense-tracker-bot |
+| **Deploy toàn bộ ứng dụng** | `./cluster/deploy-all.sh` | Tự động quét và triển khai các app trong apps/ |
 
 ---
 

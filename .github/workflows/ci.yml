@@ -46,8 +46,20 @@ jobs:
         with:
           version: v3.14.0
 
-      - name: Lint P-069 Helm Chart
-        run: helm lint apps/p069
+      - name: Lint Helm Charts
+        run: |
+          charts_found=0
+          for chart in apps/*/Chart.yaml; do
+            if [ -f "$chart" ]; then
+              charts_found=1
+              chart_dir=$(dirname "$chart")
+              echo "Linting chart: $chart_dir"
+              helm lint "$chart_dir"
+            fi
+          done
+          if [ $charts_found -eq 0 ]; then
+            echo "No Helm charts found in apps/ - skipping lint."
+          fi
 
   validate-k8s-manifests:
     name: Validate Kubernetes YAMLs

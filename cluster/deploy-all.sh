@@ -17,18 +17,20 @@ echo -e "${BOLD}${CYAN}=========================================================
 echo -e "${BOLD}${CYAN}   🚀 TRIỂN KHAI TOÀN BỘ ỨNG DỤNG LÊN NỀN TẢNG K3S VPS          ${NC}"
 echo -e "${BOLD}${CYAN}==================================================================${NC}"
 
-# 1. Triển khai P-069 AI Semantic Layer
-if [ -d "$APPS_DIR/p069" ] && [ -f "$APPS_DIR/p069/deploy.sh" ]; then
-    echo -e "\n${BOLD}${GREEN}📦 [1/2] Triển khai ứng dụng P-069...${NC}"
-    chmod +x "$APPS_DIR/p069/deploy.sh"
-    "$APPS_DIR/p069/deploy.sh" helm
-fi
+# Triển khai tất cả các ứng dụng có trong thư mục apps/
+APP_COUNT=0
+for app_dir in "$APPS_DIR"/*; do
+    if [ -d "$app_dir" ] && [ -f "$app_dir/deploy.sh" ]; then
+        APP_NAME=$(basename "$app_dir")
+        echo -e "\n${BOLD}${GREEN}📦 Triển khai ứng dụng: $APP_NAME...${NC}"
+        chmod +x "$app_dir/deploy.sh"
+        "$app_dir/deploy.sh" || true
+        APP_COUNT=$((APP_COUNT + 1))
+    fi
+done
 
-# 2. Triển khai Expense Tracker Bot
-if [ -d "$APPS_DIR/expense-tracker-bot" ] && [ -f "$APPS_DIR/expense-tracker-bot/deploy.sh" ]; then
-    echo -e "\n${BOLD}${GREEN}🤖 [2/2] Triển khai Expense Tracker Bot...${NC}"
-    chmod +x "$APPS_DIR/expense-tracker-bot/deploy.sh"
-    "$APPS_DIR/expense-tracker-bot/deploy.sh" || true
+if [ $APP_COUNT -eq 0 ]; then
+    echo -e "\n${BOLD}${GREEN}ℹ️ Chưa có ứng dụng nào được cấu hình trong apps/. Sẵn sàng cho dự án mới!${NC}"
 fi
 
 echo -e "\n${BOLD}${CYAN}==================================================================${NC}"

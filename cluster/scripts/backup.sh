@@ -24,42 +24,15 @@ echo -e "${BOLD}${CYAN}=========================================================
 sudo mkdir -p "${BACKUP_DIR}"
 echo -e "\n📁 Thư mục lưu trữ: ${BACKUP_DIR}"
 
-# 2. SAO LƯU SQLITE DATABASE CHO EXPENSE TRACKER BOT
-echo -e "\n${BOLD}${GREEN}[1/3] Sao lưu SQLite Database (Expense Tracker Bot)...${NC}"
-EXPENSE_POD=$(kubectl get pod -n expense-tracker -l app=expense-bot -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-
-if [ -n "$EXPENSE_POD" ]; then
-    echo "  -> Tìm thấy Pod: expense-tracker/$EXPENSE_POD"
-    if kubectl exec -n expense-tracker "$EXPENSE_POD" -- test -f /app/data/expense_tracker.db 2>/dev/null; then
-        kubectl exec -n expense-tracker "$EXPENSE_POD" -- sqlite3 /app/data/expense_tracker.db ".backup '/tmp/expense_backup.db'" 2>/dev/null || true
-        kubectl cp "expense-tracker/${EXPENSE_POD}:/tmp/expense_backup.db" "${BACKUP_DIR}/expense_tracker.db" 2>/dev/null || true
-        kubectl exec -n expense-tracker "$EXPENSE_POD" -- rm -f /tmp/expense_backup.db 2>/dev/null || true
-        echo "  -> Đã sao lưu SQLite database thành công."
-    else
-        echo "  -> File database chưa được tạo trong pod, bỏ qua."
-    fi
-else
-    echo "  -> Pod expense-tracker không chạy, bỏ qua."
-fi
-
-# 3. SAO LƯU POSTGRESQL CHO P-069
-echo -e "\n${BOLD}${GREEN}[2/3] Sao lưu PostgreSQL Database (P-069 Semantic Layer)...${NC}"
-# Tìm pod postgres ở namespace p069 hoặc default
-PG_POD=$(kubectl get pod -n p069 -l app=postgres -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-PG_NS="p069"
-
-if [ -z "$PG_POD" ]; then
-    PG_POD=$(kubectl get pod -n default -l app=postgres -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-    PG_NS="default"
-fi
-
-if [ -n "$PG_POD" ]; then
-    echo "  -> Tìm thấy PostgreSQL Pod: $PG_NS/$PG_POD"
-    kubectl exec -n "$PG_NS" "$PG_POD" -- pg_dump -U postgres semantic_layer > "${BACKUP_DIR}/p069_postgres.sql" 2>/dev/null || true
-    echo "  -> Đã xuất pg_dump thành công vào ${BACKUP_DIR}/p069_postgres.sql"
-else
-    echo "  -> Pod postgres không hoạt động, bỏ qua."
-fi
+# 2. SAO LƯU DỮ LIỆU CÁC DATABASE (Tùy chỉnh theo ứng dụng của bạn)
+echo -e "\n${BOLD}${GREEN}ℹ️ Kiểm tra sao lưu cơ sở dữ liệu ứng dụng...${NC}"
+# Bạn có thể thêm lệnh backup database (PostgreSQL, MySQL, SQLite, MongoDB...) cho ứng dụng mới tại đây:
+# Ví dụ:
+# PG_POD=$(kubectl get pod -n <namespace> -l app=<db-name> -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+# if [ -n "$PG_POD" ]; then
+#     kubectl exec -n <namespace> "$PG_POD" -- pg_dump -U postgres <dbname> > "${BACKUP_DIR}/database.sql" 2>/dev/null || true
+# fi
+echo "  -> Chưa có database nào được chỉ định để sao lưu. Bỏ qua bước này."
 
 # 4. ĐÓNG GÓI & NÉN THÀNH FILE TAR.GZ
 echo -e "\n${BOLD}${GREEN}[3/3] Nén toàn bộ dữ liệu sao lưu...${NC}"
