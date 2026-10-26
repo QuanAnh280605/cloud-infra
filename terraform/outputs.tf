@@ -12,3 +12,8 @@ output "ssh_command" {
   description = "Lệnh SSH đăng nhập vào VPS"
   value       = "ssh ubuntu@${oci_core_instance.vps_full.public_ip}"
 }
+
+output "argocd_url" {
+  description = "Địa chỉ Web UI của ArgoCD"
+  value       = "https://argocd.${oci_core_instance.vps_full.public_ip}.nip.io"
+}

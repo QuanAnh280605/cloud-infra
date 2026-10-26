@@ -145,3 +145,36 @@ resource "oci_core_instance" "vps_full" {
     ]
   }
 }
+
+
+
+resource "terraform_data" "k3s_bootstrap" {
+  # Tự động chạy lại nếu ID của con VPS thay đổi
+  triggers_replace = [
+    oci_core_instance.vps_full.id
+  ]
+  # Khai báo thông tin kết nối SSH
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+    host = oci_core_instance.vps_full.public_ip
+    # Đổi đường dẫn dưới đây trỏ đúng vào file Private Key trên máy tính của bạn:
+    private_key = file("~/.ssh/oracle_vps.key")
+    timeout     = "3m"
+  }
+  # Bước 1: Copy file script từ máy bạn lên thư mục /tmp trên VPS
+  provisioner "file" {
+    source      = "${path.module}/script/bootstrap.sh"
+    destination = "/tmp/bootstrap.sh"
+  }
+  # Bước 2: Chạy file script trên VPS
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/bootstrap.sh",
+      "/tmp/bootstrap.sh ${var.admin_email} '${oci_core_instance.vps_full.public_ip}'",
+      "rm -f /tmp/bootstrap.sh"
+    ]
+  }
+  # Đảm bảo chỉ chạy sau khi máy ảo VPS đã hoàn toàn sẵn sàng
+  depends_on = [oci_core_instance.vps_full]
+}
