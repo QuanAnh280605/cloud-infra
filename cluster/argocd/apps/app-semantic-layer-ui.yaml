@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: semantic-layer-ui                          # Tên hiển thị của App trên ArgoCD
+  namespace: argocd                       # Bắt buộc nằm trong namespace 'argocd'
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default                        # Nhóm phân quyền (mặc định là 'default')
+
+  # NGUỒN CHỨA CODE (SOURCE)
+  source:
+    repoURL: https://github.com/QuanAnh280605/cloud-infra.git # Link Git của bạn
+    targetRevision: main                                      # Nhánh Git cần theo dõi
+    path: apps/semantic-layer-ui                             # Thư mục chứa YAML của app
+
+  # ==============================================================================
+  # ĐÍCH ĐẾN TRÊN CỤM (DESTINATION)
+  # ==============================================================================
+  destination:
+    server: https://kubernetes.default.svc # Cụm K3s hiện tại của bạn
+    namespace: semantic-layer              # Đẩy app vào namespace 'demo'
+
+  # ==============================================================================
+  # CHÍNH SÁCH ĐỒNG BỘ TỰ ĐỘNG (SYNC POLICY)
+  # ==============================================================================
+  syncPolicy:
+    automated:
+      prune: true       # Xóa file trên Git -> Tự xóa tài nguyên trên K8s
+      selfHeal: true    # Ai táy máy sửa bậy pod trên server -> ArgoCD tự đè lại theo Git
+    syncOptions:
+      - CreateNamespace=true  # Tự động tạo namespace 'demo' nếu chưa có
