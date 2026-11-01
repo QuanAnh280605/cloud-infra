@@ -171,12 +171,9 @@ affinity: {}
 
 env:
   appEnv: "production"
-  secretKey: "prod-semantic-layer-secret-key-change-later"
-  encryptionKey: "e0fvYjDHmbwjGtKqRWqO4Ba_YZjj0BR8t4g_RNeqStA="
 
 postgres:
   enabled: true
   dbName: "semantic_layer"
   user: "semantic_user"
-  password: "semantic_secret_pwd_2026"
   storage: 15Gi
