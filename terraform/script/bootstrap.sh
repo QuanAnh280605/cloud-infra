@@ -110,3 +110,28 @@ echo "Tài khoản   : admin"
 echo -n "Mật khẩu    : "
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
 echo "=========================================================="
+
+echo "=========================================================="
+echo "👑 Đang kích hoạt mô hình App-of-Apps (Root Application)..."
+echo "=========================================================="
+cat <<EOF | kubectl apply -f -
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/QuanAnh280605/cloud-infra.git
+    targetRevision: main
+    path: cluster/argocd/apps             # <-- Theo dõi toàn bộ thư mục này!
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

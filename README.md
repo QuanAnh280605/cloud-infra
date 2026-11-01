@@ -5,5 +5,9 @@ Kho lưu trữ Infrastructure as Code (IaC) và GitOps quản lý hạ tầng đ
 ---
 
 ## 🎯 Mục tiêu
+
 - Tự tay xây dựng toàn bộ hạ tầng đám mây và nền tảng Kubernetes từng bước một.
 - Nắm vững kiến thức: IaC (Terraform), Kubernetes (K3s), Ingress & SSL (Cert-Manager), GitOps (ArgoCD), và CI/CD.
+<https://argocd.140.245.58.162.nip.io>
+Tài khoản: admin
+Mật khẩu: j0ACpxReLNJ4TdqB
