@@ -44,6 +44,13 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          env:
+            - name: APP_ENV
+              value: {{ .Values.env.appEnv | default "production" | quote }}
+            - name: FRONTEND_APP_URL
+              value: {{ .Values.env.frontendAppUrl | default "https://app.140.245.58.162.nip.io" | quote }}
+            - name: CORS_ORIGINS
+              value: {{ .Values.env.corsOrigins | default "https://app.140.245.58.162.nip.io,http://localhost:3000" | quote }}
           envFrom:
             - secretRef:
                 name: backend-secret

@@ -171,6 +171,8 @@ affinity: {}
 
 env:
   appEnv: "production"
+  frontendAppUrl: "https://app.140.245.58.162.nip.io"
+  corsOrigins: "https://app.140.245.58.162.nip.io,http://localhost:3000"
 
 postgres:
   enabled: true
