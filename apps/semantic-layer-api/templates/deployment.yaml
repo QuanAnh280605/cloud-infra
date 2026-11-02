@@ -13,10 +13,11 @@ spec:
       {{- include "semantic-layer-api.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        reloader.stakater.com/auto: "true"
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "semantic-layer-api.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
@@ -44,19 +45,6 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          env:
-            - name: APP_ENV
-              value: {{ .Values.env.appEnv | default "production" | quote }}
-            - name: FRONTEND_APP_URL
-              value: {{ .Values.env.frontendAppUrl | default "https://app.140.245.58.162.nip.io" | quote }}
-            - name: CORS_ORIGINS
-              value: {{ .Values.env.corsOrigins | default "https://app.140.245.58.162.nip.io,http://localhost:3000" | quote }}
-            - name: LLM_PROVIDER
-              value: {{ .Values.env.llmProvider | default "openai" | quote }}
-            {{- if .Values.env.modelName }}
-            - name: MODEL_NAME
-              value: {{ .Values.env.modelName | quote }}
-            {{- end }}
           envFrom:
             - secretRef:
                 name: backend-secret
