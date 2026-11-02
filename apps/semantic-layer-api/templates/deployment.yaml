@@ -51,6 +51,12 @@ spec:
               value: {{ .Values.env.frontendAppUrl | default "https://app.140.245.58.162.nip.io" | quote }}
             - name: CORS_ORIGINS
               value: {{ .Values.env.corsOrigins | default "https://app.140.245.58.162.nip.io,http://localhost:3000" | quote }}
+            - name: LLM_PROVIDER
+              value: {{ .Values.env.llmProvider | default "openai" | quote }}
+            {{- if .Values.env.modelName }}
+            - name: MODEL_NAME
+              value: {{ .Values.env.modelName | quote }}
+            {{- end }}
           envFrom:
             - secretRef:
                 name: backend-secret
