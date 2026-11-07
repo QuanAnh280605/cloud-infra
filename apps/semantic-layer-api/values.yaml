@@ -177,10 +177,10 @@ env:
   modelName: "gpt-4o-mini"
   # AI Observability (Input/Output Tracing - Secret keys retrieved securely from OCI Vault)
   langfuse:
-    enabled: false
+    enabled: true
     baseUrl: "https://cloud.langfuse.com"
   langchain:
-    enabled: true
+    enabled: false
     project: "ai-semantic-layer-prod"
 
 postgres:
