@@ -175,15 +175,12 @@ env:
   corsOrigins: "https://app.140.245.58.162.nip.io,http://localhost:3000"
   llmProvider: "openai"
   modelName: "gpt-4o-mini"
-  # AI Observability (Input/Output Tracing)
+  # AI Observability (Input/Output Tracing - Secret keys retrieved securely from OCI Vault)
   langfuse:
     enabled: true
-    publicKey: ""
-    secretKey: ""
     baseUrl: "https://cloud.langfuse.com"
   langchain:
     enabled: false
-    apiKey: ""
     project: "ai-semantic-layer-prod"
 
 postgres:
