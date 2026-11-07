@@ -180,7 +180,7 @@ env:
     enabled: false
     baseUrl: "https://cloud.langfuse.com"
   langchain:
-    enabled: false
+    enabled: true
     project: "ai-semantic-layer-prod"
 
 postgres:
