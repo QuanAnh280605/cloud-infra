@@ -1,0 +1,45 @@
+# ==============================================================================
+# Cấu hình Grafana Tempo (Distributed Tracing gọn nhẹ)
+# Namespace: monitoring
+# ==============================================================================
+
+tempo:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
+
+  retention: 72h    # Lưu vết trong 3 ngày
+
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+
+  persistence:
+    enabled: true
+    storageClassName: local-path
+    size: 3Gi
+
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: "0.0.0.0:4318"
+        grpc:
+          endpoint: "0.0.0.0:4317"
+    jaeger:
+      protocols:
+        thrift_http:
+          endpoint: "0.0.0.0:14268"
+        grpc:
+          endpoint: "0.0.0.0:14250"
+    zipkin:
+      endpoint: "0.0.0.0:9411"
+

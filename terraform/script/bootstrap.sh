@@ -58,7 +58,18 @@ echo "=========================================================="
 kubectl get clusterissuer
 
 echo "=========================================================="
-echo "🐙 [6/6] Đang cài đặt ArgoCD GitOps Engine..."
+echo "🔐 [6/7] Đang cài đặt External Secrets Operator (OCI Vault)..."
+echo "=========================================================="
+helm repo add external-secrets https://charts.external-secrets.io
+helm repo update
+helm upgrade --install external-secrets external-secrets/external-secrets \
+    -n external-secrets \
+    --create-namespace \
+    --set installCRDs=true \
+    --wait --timeout=120s
+
+echo "=========================================================="
+echo "🐙 [7/7] Đang cài đặt ArgoCD GitOps Engine..."
 echo "=========================================================="
 # 1. Tạo namespace và cài ArgoCD
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -

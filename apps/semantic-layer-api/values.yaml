@@ -181,3 +181,6 @@ postgres:
   dbName: "semantic_layer"
   user: "semantic_user"
   storage: 15Gi
+
+metrics:
+  enabled: true

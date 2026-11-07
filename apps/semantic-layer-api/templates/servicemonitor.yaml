@@ -1,0 +1,17 @@
+{{- if .Values.metrics.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "semantic-layer-api.fullname" . }}
+  labels:
+    {{- include "semantic-layer-api.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "semantic-layer-api.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+{{- end }}
+

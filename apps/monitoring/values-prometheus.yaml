@@ -1,0 +1,168 @@
+# ==============================================================================
+# Tối ưu hóa kube-prometheus-stack cho cụm K3s (12 GB RAM, 47 GB Disk)
+# Namespace: monitoring
+# Ingress: grafana.140.245.58.162.nip.io
+# ==============================================================================
+
+defaultRules:
+  create: true
+  rules:
+    etcd: false               # K3s quản lý etcd nội bộ, không expose port chuẩn
+    kubeScheduler: false      # K3s chạy embedded scheduler
+    kubeControllerManager: false
+    kubeProxy: false
+
+# ------------------------------------------------------------------------------
+# 1. Prometheus Server Configuration
+# ------------------------------------------------------------------------------
+prometheus:
+  enabled: true
+  prometheusSpec:
+    replicas: 1
+    retention: 10d
+    retentionSize: 8GB
+    scrapeInterval: 30s
+    evaluationInterval: 30s
+    
+    # Cho phép Prometheus tự động scrape ServiceMonitor ở mọi namespace
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+
+    resources:
+      requests:
+        cpu: 150m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1536Mi
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+# ------------------------------------------------------------------------------
+# 2. Grafana Dashboard & Visualization
+# ------------------------------------------------------------------------------
+grafana:
+  enabled: true
+  replicas: 1
+  adminPassword: "admin"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 384Mi
+
+  persistence:
+    enabled: true
+    storageClassName: local-path
+    size: 2Gi
+
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    hosts:
+      - grafana.140.245.58.162.nip.io
+    tls:
+      - secretName: grafana-tls-secret
+        hosts:
+          - grafana.140.245.58.162.nip.io
+
+  # Tự động liên kết Datasources Loki & Tempo vào Grafana
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki.monitoring.svc.cluster.local:3100
+      jsonData:
+        maxLines: 1000
+        derivedFields:
+          - datasourceUid: tempo
+            matcherRegex: '"trace_id":\s*"([a-f0-9]+)"'
+            name: TraceID
+            url: '$${__value.raw}'
+
+    - name: Tempo
+      type: tempo
+      access: proxy
+      url: http://tempo.monitoring.svc.cluster.local:3100
+      uid: tempo
+      jsonData:
+        tracesToLogsV2:
+          datasourceUid: 'Loki'
+          spanStartTimeShift: '-1h'
+          spanEndTimeShift: '1h'
+          filterByTraceId: true
+          filterBySpanId: false
+          customQuery: true
+          query: '{$${__tags}} |= "$${__trace.id}"'
+
+# ------------------------------------------------------------------------------
+# 3. Alertmanager & Notification
+# ------------------------------------------------------------------------------
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname', 'namespace', 'job']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: 'null'
+      routes:
+        - match:
+            alertname: Watchdog
+          receiver: 'null'
+        - receiver: 'telegram-notifications'
+          continue: true
+    receivers:
+      - name: 'null'
+      - name: 'telegram-notifications'
+        # Thay thế bằng token và chat_id thật khi đưa vào vận hành
+        # telegram_configs:
+        #   - bot_token: "<TELEGRAM_BOT_TOKEN>"
+        #     chat_id: <TELEGRAM_CHAT_ID>
+        #     send_resolved: true
+        #     parse_mode: 'HTML'
+
+# ------------------------------------------------------------------------------
+# 4. Exporters tích hợp sẵn
+# ------------------------------------------------------------------------------
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
