@@ -14,6 +14,7 @@ spec:
   template:
     metadata:
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/external-secret.yaml") . | sha256sum }}
         reloader.stakater.com/auto: "true"
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
