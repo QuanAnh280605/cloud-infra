@@ -1,0 +1,49 @@
+{{- if .Values.tracing.enabled }}
+# Bootstrap OpenTelemetry tracing without rebuilding the application image.
+#
+# CPython imports a module named "sitecustomize" at interpreter start-up, before
+# any application code runs. The init container installs the FastAPI
+# instrumentation into an emptyDir that is exposed through PYTHONPATH, and copies
+# this file next to it, so every worker process configures the tracer and wraps
+# FastAPI before the app is created.
+#
+# The SDK and the OTLP/HTTP exporter already ship inside the application image.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "semantic-layer-api.fullname" . }}-otel
+  labels:
+    {{- include "semantic-layer-api.labels" . | nindent 4 }}
+data:
+  sitecustomize.py: |
+    """Configure OTLP tracing for every process started by the app container."""
+
+    import os
+
+    if os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"):
+        try:
+            from opentelemetry import trace
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+            from opentelemetry.sdk.trace import TracerProvider
+            from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+            _provider = TracerProvider()
+            _provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+            trace.set_tracer_provider(_provider)
+
+            import fastapi
+            from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+            _original_init = fastapi.FastAPI.__init__
+
+            def _instrumenting_init(self, *args, **kwargs):
+                _original_init(self, *args, **kwargs)
+                try:
+                    FastAPIInstrumentor.instrument_app(self)
+                except Exception:  # noqa: BLE001 - tracing must never break the app
+                    pass
+
+            fastapi.FastAPI.__init__ = _instrumenting_init
+        except Exception:  # noqa: BLE001 - tracing must never break the app
+            pass
+{{- end }}
