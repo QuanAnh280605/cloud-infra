@@ -7,6 +7,12 @@ loki:
   enabled: true
   isDefault: false
 
+  # Pin cứng để config bên dưới luôn khớp version (đổi image phải đổi schema).
+  image:
+    repository: grafana/loki
+    tag: 2.6.1
+    pullPolicy: IfNotPresent
+
   resources:
     requests:
       cpu: 100m
@@ -20,33 +26,46 @@ loki:
     storageClassName: local-path
     size: 5Gi
 
+  # Chart loki-stack 2.10.2 chạy image grafana/loki:2.6.1 — image này chỉ hỗ trợ
+  # schema tối đa v11 + store boltdb-shipper (tsdb/v12/v13 chỉ có từ Loki 2.7+).
   config:
     auth_enabled: false
     server:
       http_listen_port: 3100
       grpc_listen_port: 9096
+      log_level: info
 
-    common:
-      path_prefix: /var/loki
-      storage:
-        filesystem:
-          chunks_directory: /var/loki/chunks
-          rules_directory: /var/loki/rules
-      replication_factor: 1
-      ring:
-        instance_addr: 127.0.0.1
-        kvstore:
-          store: inmemory
+    ingester:
+      lifecycler:
+        address: 127.0.0.1
+        ring:
+          kvstore:
+            store: inmemory
+          replication_factor: 1
+        final_sleep: 0s
+      chunk_idle_period: 5m
+      chunk_retain_period: 30s
+      wal:
+        enabled: true
+        dir: /var/loki/wal
 
     schema_config:
       configs:
         - from: 2024-01-01
-          store: tsdb
+          store: boltdb-shipper
           object_store: filesystem
-          schema: v13
+          schema: v11
           index:
             prefix: index_
             period: 24h
+
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /var/loki/index
+        cache_location: /var/loki/index_cache
+        shared_store: filesystem
+      filesystem:
+        directory: /var/loki/chunks
 
     limits_config:
       enforce_metric_name: false
@@ -54,9 +73,13 @@ loki:
       reject_old_samples_max_age: 168h
       retention_period: 168h       # Lưu giữ log trong 7 ngày
 
-    table_manager:
-      retention_deletes_enabled: true
-      retention_period: 168h
+    # Loki 2.6 xoá dữ liệu hết hạn bằng compactor (table_manager không còn dùng)
+    compactor:
+      working_directory: /var/loki/compactor
+      shared_store: filesystem
+      retention_enabled: true
+      retention_delete_delay: 2h
+      retention_delete_worker_count: 150
 
 # ------------------------------------------------------------------------------
 # Promtail DaemonSet (Tự động thu thập log từ tất cả các Container)
