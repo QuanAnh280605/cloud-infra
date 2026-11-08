@@ -39,7 +39,10 @@ data:
             def _instrumenting_init(self, *args, **kwargs):
                 _original_init(self, *args, **kwargs)
                 try:
-                    FastAPIInstrumentor.instrument_app(self)
+                    # instrument_app() ignores OTEL_PYTHON_FASTAPI_EXCLUDED_URLS,
+                    # so the exclusion list is handed over explicitly.
+                    excluded = os.environ.get("OTEL_PYTHON_FASTAPI_EXCLUDED_URLS") or None
+                    FastAPIInstrumentor.instrument_app(self, excluded_urls=excluded)
                 except Exception:  # noqa: BLE001 - tracing must never break the app
                     pass
 
