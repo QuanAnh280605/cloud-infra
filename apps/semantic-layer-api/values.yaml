@@ -178,7 +178,7 @@ env:
   # AI Observability (Input/Output Tracing - Secret keys retrieved securely from OCI Vault)
   langfuse:
     enabled: true
-    baseUrl: "https://cloud.langfuse.com"
+    baseUrl: "https://jp.cloud.langfuse.com"
   langchain:
     enabled: false
     project: "ai-semantic-layer-prod"
