@@ -47,7 +47,7 @@ loki:
       chunk_retain_period: 30s
       wal:
         enabled: true
-        dir: /var/loki/wal
+        dir: /data/loki/wal
 
     schema_config:
       configs:
@@ -61,11 +61,11 @@ loki:
 
     storage_config:
       boltdb_shipper:
-        active_index_directory: /var/loki/index
-        cache_location: /var/loki/index_cache
+        active_index_directory: /data/loki/index
+        cache_location: /data/loki/index_cache
         shared_store: filesystem
       filesystem:
-        directory: /var/loki/chunks
+        directory: /data/loki/chunks
 
     limits_config:
       enforce_metric_name: false
@@ -75,7 +75,7 @@ loki:
 
     # Loki 2.6 xoá dữ liệu hết hạn bằng compactor (table_manager không còn dùng)
     compactor:
-      working_directory: /var/loki/compactor
+      working_directory: /data/loki/compactor
       shared_store: filesystem
       retention_enabled: true
       retention_delete_delay: 2h
