@@ -85,7 +85,9 @@ grafana:
     - name: Loki
       type: loki
       access: proxy
-      url: http://loki.monitoring.svc.cluster.local:3100
+      # UID cố định để Tempo (tracesToLogsV2) và derivedFields trỏ tới được.
+      uid: loki
+      url: http://monitoring-loki.monitoring.svc.cluster.local:3100
       jsonData:
         maxLines: 1000
         derivedFields:
@@ -101,7 +103,13 @@ grafana:
       uid: tempo
       jsonData:
         tracesToLogsV2:
-          datasourceUid: 'Loki'
+          datasourceUid: 'loki'
+          # Map attribute của span sang label của Loki (promtail gắn app/namespace).
+          tags:
+            - key: 'service.name'
+              value: 'app'
+            - key: 'service.namespace'
+              value: 'namespace'
           spanStartTimeShift: '-1h'
           spanEndTimeShift: '1h'
           filterByTraceId: true
