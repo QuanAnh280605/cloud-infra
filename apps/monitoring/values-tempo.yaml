@@ -4,13 +4,16 @@
 # ==============================================================================
 
 tempo:
+  # Tempo chạy all-in-one (ingester + querier + compactor + metrics-generator) nên
+  # cần nhiều RAM hơn chart mặc định: limit 384Mi từng bị OOMKilled liên tục
+  # (48 lần restart), khiến trace mới không hiển thị được.
   resources:
     requests:
-      cpu: 50m
-      memory: 128Mi
+      cpu: 100m
+      memory: 256Mi
     limits:
-      cpu: 300m
-      memory: 384Mi
+      cpu: 1
+      memory: 1Gi
 
   retention: 72h    # Lưu vết trong 3 ngày
 
