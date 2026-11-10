@@ -54,6 +54,12 @@ grafana:
   replicas: 1
   adminPassword: "admin"
 
+  # Datasources chỉ được nạp lúc Grafana khởi động và configmap datasource không
+  # có checksum annotation, nên bump giá trị này mỗi khi sửa additionalDataSources
+  # để Argo tự rolling restart pod.
+  podAnnotations:
+    datasources/version: "2"
+
   resources:
     requests:
       cpu: 100m
