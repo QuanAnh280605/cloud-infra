@@ -184,13 +184,14 @@ env:
     project: "ai-semantic-layer-prod"
 
 # Distributed tracing: OpenTelemetry spans exported to Grafana Tempo.
-# The app image already ships the OpenTelemetry SDK + OTLP/HTTP exporter, so only
-# the FastAPI instrumentation is pip-installed by an init container at start-up.
+# FastAPI instruments itself natively and the image already ships the SDK plus the
+# OTLP/HTTP exporter, so a sitecustomize.py (see templates/otel-bootstrap.yaml)
+# only has to register the tracer provider and the list of paths to skip.
 tracing:
   enabled: true
   endpoint: "http://monitoring-tempo.monitoring.svc.cluster.local:4318"
   samplerRatio: "1.0"
-  instrumentationVersion: "0.66b2"
+  excludePaths: "/health,/metrics,/docs,/openapi.json,/redoc"
 
 postgres:
   enabled: true

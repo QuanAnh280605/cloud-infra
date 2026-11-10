@@ -15,6 +15,9 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/external-secret.yaml") . | sha256sum }}
+        {{- if .Values.tracing.enabled }}
+        checksum/otel: {{ include (print $.Template.BasePath "/otel-bootstrap.yaml") . | sha256sum }}
+        {{- end }}
         reloader.stakater.com/auto: "true"
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
@@ -34,39 +37,6 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.tracing.enabled }}
-      initContainers:
-        # Installs the FastAPI instrumentation next to the app (the image already
-        # ships the OpenTelemetry SDK) and drops the sitecustomize bootstrap.
-        - name: otel-instrumentation
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - /bin/sh
-            - -c
-            - |
-              pip install --no-cache-dir --disable-pip-version-check --no-deps --target=/otel \
-                "opentelemetry-instrumentation-fastapi=={{ .Values.tracing.instrumentationVersion }}" \
-                "opentelemetry-instrumentation-asgi=={{ .Values.tracing.instrumentationVersion }}" \
-                "opentelemetry-util-http=={{ .Values.tracing.instrumentationVersion }}" \
-                "wrapt" \
-                || pip install --no-cache-dir --disable-pip-version-check --target=/otel \
-                "opentelemetry-instrumentation-fastapi=={{ .Values.tracing.instrumentationVersion }}" \
-                || echo "WARN: OpenTelemetry instrumentation install failed; tracing stays disabled"
-              cp /otel-bootstrap/sitecustomize.py /otel/sitecustomize.py
-          volumeMounts:
-            - name: otel-instrumentation
-              mountPath: /otel
-            - name: otel-bootstrap
-              mountPath: /otel-bootstrap
-          resources:
-            requests:
-              cpu: 50m
-              memory: 64Mi
-            limits:
-              cpu: 500m
-              memory: 256Mi
-      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
@@ -85,7 +55,7 @@ spec:
           {{- if .Values.tracing.enabled }}
           env:
             - name: PYTHONPATH
-              value: "/otel"
+              value: "/otel-bootstrap"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: {{ .Values.tracing.endpoint | quote }}
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
@@ -94,12 +64,10 @@ spec:
               value: {{ include "semantic-layer-api.fullname" . | quote }}
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: "deployment.environment={{ .Values.env.appEnv }},service.namespace={{ .Release.Namespace }}"
-            - name: OTEL_TRACES_SAMPLER
-              value: "parentbased_traceidratio"
             - name: OTEL_TRACES_SAMPLER_ARG
               value: {{ .Values.tracing.samplerRatio | quote }}
-            - name: OTEL_PYTHON_FASTAPI_EXCLUDED_URLS
-              value: "health,metrics,docs,openapi.json"
+            - name: FASTAPI_OTEL_EXCLUDE_PATHS
+              value: {{ .Values.tracing.excludePaths | quote }}
             - name: OTEL_BSP_SCHEDULE_DELAY
               value: "2000"
           {{- end }}
@@ -118,8 +86,9 @@ spec:
           {{- if or .Values.tracing.enabled .Values.volumeMounts }}
           volumeMounts:
             {{- if .Values.tracing.enabled }}
-            - name: otel-instrumentation
-              mountPath: /otel
+            - name: otel-bootstrap
+              mountPath: /otel-bootstrap
+              readOnly: true
             {{- end }}
             {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -127,8 +96,6 @@ spec:
           {{- end }}
       volumes:
         {{- if .Values.tracing.enabled }}
-        - name: otel-instrumentation
-          emptyDir: {}
         - name: otel-bootstrap
           configMap:
             name: {{ include "semantic-layer-api.fullname" . }}-otel
