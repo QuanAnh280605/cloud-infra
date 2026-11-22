@@ -20,7 +20,6 @@ resource "oci_core_instance" "vps_full" {
   availability_domain = "ScQZ:AP-SINGAPORE-2-AD-1"
   compartment_id      = "ocid1.tenancy.oc1..aaaaaaaavms5zapkgqcrgb5nkp57u7rfnmvgkfuun7jrs7oi34pyvm5uehaa"
   display_name        = "instance-20261001-1134"
-  fault_domain        = "FAULT-DOMAIN-3"
 
   # Public key được đưa vào VPS khi tạo máy; private key chỉ nằm trên máy quản trị.
   metadata = {
@@ -29,18 +28,10 @@ resource "oci_core_instance" "vps_full" {
   shape = "VM.Standard.A1.Flex"
   state = "RUNNING"
 
-  # Không ưu tiên live migration khi OCI bảo trì phần cứng.
-  availability_config {
-    is_live_migration_preferred = false
-  }
-
   # VNIC nối VPS vào subnet hiện có và cấp IP công khai cho Ingress/SSH.
   create_vnic_details {
     assign_private_dns_record = false
     assign_public_ip          = "true"
-    display_name              = "instance-20261001-1134"
-    nsg_ids                   = []
-    private_ip                = "10.0.0.204"
     subnet_id                 = "ocid1.subnet.oc1.ap-singapore-2.aaaaaaaazbppuzzgideqepnagevs5xbcbwfbvvvu3lskfaofdom3mlnydl7q"
   }
 
@@ -48,26 +39,14 @@ resource "oci_core_instance" "vps_full" {
   instance_options {
     are_legacy_imds_endpoints_disabled = true
   }
-  # Cố định cách VM khởi động và nhìn thấy thiết bị mạng/ổ đĩa.
-  launch_options {
-    boot_volume_type                    = "PARAVIRTUALIZED"
-    firmware                            = "UEFI_64"
-    is_consistent_volume_naming_enabled = true
-    is_pv_encryption_in_transit_enabled = true
-    network_type                        = "PARAVIRTUALIZED"
-    remote_data_volume_type             = "PARAVIRTUALIZED"
-  }
   # Tài nguyên thực cấp cho shape A1 Flex.
   shape_config {
     memory_in_gbs = 12
-    nvmes         = 0
     ocpus         = 2
-    vcpus         = 2
   }
   # Tạo boot volume từ image OCI đã chọn.
   source_details {
     boot_volume_size_in_gbs         = "47"
-    boot_volume_vpus_per_gb         = "10"
     is_preserve_boot_volume_enabled = false
     source_id                       = "ocid1.image.oc1.ap-singapore-2.aaaaaaaan7h2srks22b2jnihsx7i5vwdurk7g6wq5wtjmnzqaghiesnintxa"
     source_type                     = "image"

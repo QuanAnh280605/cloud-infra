@@ -4,16 +4,6 @@ output "vps_public_ip" {
   value       = oci_core_instance.vps_full.public_ip
 }
 
-output "vps_shape" {
-  description = "Cấu hình phần cứng VPS"
-  value       = "${oci_core_instance.vps_full.shape} (${oci_core_instance.vps_full.shape_config[0].ocpus} OCPU, ${oci_core_instance.vps_full.shape_config[0].memory_in_gbs} GB RAM)"
-}
-
-output "ssh_command" {
-  description = "Lệnh SSH đăng nhập vào VPS"
-  value       = "ssh ubuntu@${oci_core_instance.vps_full.public_ip}"
-}
-
 output "argocd_url" {
   # URL này được ghép từ IP; muốn truy cập được vẫn cần DNS, Ingress và TLS hoạt động.
   description = "Địa chỉ Web UI của ArgoCD"

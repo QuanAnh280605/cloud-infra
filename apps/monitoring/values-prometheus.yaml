@@ -126,6 +126,7 @@ grafana:
 # ------------------------------------------------------------------------------
 # 3. Alertmanager & Notification
 # ------------------------------------------------------------------------------
+# Giữ giao diện xem cảnh báo; chart mặc định dùng receiver null, chưa gửi thông báo ngoài.
 alertmanager:
   enabled: true
   alertmanagerSpec:
@@ -145,31 +146,6 @@ alertmanager:
           resources:
             requests:
               storage: 1Gi
-
-  config:
-    global:
-      resolve_timeout: 5m
-    route:
-      group_by: ['alertname', 'namespace', 'job']
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 4h
-      receiver: 'null'
-      routes:
-        - match:
-            alertname: Watchdog
-          receiver: 'null'
-        - receiver: 'telegram-notifications'
-          continue: true
-    receivers:
-      - name: 'null'
-      - name: 'telegram-notifications'
-        # Thay thế bằng token và chat_id thật khi đưa vào vận hành
-        # telegram_configs:
-        #   - bot_token: "<TELEGRAM_BOT_TOKEN>"
-        #     chat_id: <TELEGRAM_CHAT_ID>
-        #     send_resolved: true
-        #     parse_mode: 'HTML'
 
 # ------------------------------------------------------------------------------
 # 4. Exporters tích hợp sẵn

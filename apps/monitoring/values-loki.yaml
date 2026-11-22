@@ -98,7 +98,6 @@ promtail:
   config:
     lokiAddress: http://{{ .Release.Name }}:3100/loki/api/v1/push
     snippets:
-      extraScrapeConfigs: ""
       pipelineStages:
         - cri: {}
         - json:

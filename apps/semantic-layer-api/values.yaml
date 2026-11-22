@@ -32,10 +32,6 @@ ingress:
       hosts:
         - api.140.245.58.162.nip.io
 
-# Cụm hiện dùng Ingress thay vì Gateway API HTTPRoute.
-httpRoute:
-  enabled: false
-
 resources:
   requests:
     cpu: 100m
@@ -58,10 +54,6 @@ readinessProbe:
   initialDelaySeconds: 15
   periodSeconds: 5
 
-# Cụm một node đang chạy một Pod API; HPA hiện tắt.
-autoscaling:
-  enabled: false
-
 env:
   appEnv: production
   frontendAppUrl: https://app.140.245.58.162.nip.io
@@ -70,8 +62,6 @@ env:
   langfuse:
     enabled: true
     baseUrl: https://jp.cloud.langfuse.com
-  langchain:
-    enabled: false
 
 # API xuất distributed traces qua OTLP/HTTP tới Tempo trong namespace monitoring.
 tracing:

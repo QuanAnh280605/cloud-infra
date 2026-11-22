@@ -31,10 +31,6 @@ ingress:
       hosts:
         - app.140.245.58.162.nip.io
 
-# Cụm hiện dùng Ingress thay vì Gateway API HTTPRoute.
-httpRoute:
-  enabled: false
-
 resources:
   requests:
     cpu: 100m
@@ -56,7 +52,3 @@ readinessProbe:
     port: http
   initialDelaySeconds: 15
   periodSeconds: 5
-
-# Cụm một node đang chạy một Pod UI; HPA hiện tắt.
-autoscaling:
-  enabled: false
