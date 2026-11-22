@@ -1,3 +1,4 @@
+# Service ClusterIP cấp địa chỉ ổn định cho các Pod demo trong namespace demo.
 apiVersion: v1
 kind: Service
 metadata:

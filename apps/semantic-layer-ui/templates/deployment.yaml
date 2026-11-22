@@ -1,3 +1,4 @@
+# UI Deployment chạy image Next.js; tag image được CI cập nhật trong values.yaml.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

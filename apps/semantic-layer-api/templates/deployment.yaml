@@ -1,3 +1,4 @@
+# API Deployment lấy image, tài nguyên và probe từ values.yaml; Secret được nạp lúc Pod khởi động.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,10 +15,12 @@ spec:
   template:
     metadata:
       annotations:
+        # Đổi template ExternalSecret hoặc cấu hình tracing sẽ tạo Pod mới để nhận cấu hình.
         checksum/config: {{ include (print $.Template.BasePath "/external-secret.yaml") . | sha256sum }}
         {{- if .Values.tracing.enabled }}
         checksum/otel: {{ include (print $.Template.BasePath "/otel-bootstrap.yaml") . | sha256sum }}
         {{- end }}
+        # Annotation này chỉ tự khởi động lại Pod nếu cụm đã cài Stakater Reloader.
         reloader.stakater.com/auto: "true"
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}

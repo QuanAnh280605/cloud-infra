@@ -1,3 +1,4 @@
+{{/* Prometheus Operator dùng ServiceMonitor để scrape endpoint /metrics của API. */}}
 {{- if .Values.metrics.enabled -}}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

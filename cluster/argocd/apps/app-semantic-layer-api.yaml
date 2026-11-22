@@ -1,3 +1,4 @@
+# Argo CD render Helm chart API trong cloud-infra và đồng bộ vào namespace semantic-layer.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -19,7 +20,7 @@ spec:
   # ==============================================================================
   destination:
     server: https://kubernetes.default.svc # Cụm K3s hiện tại của bạn
-    namespace: semantic-layer              # Đẩy app vào namespace 'demo'
+    namespace: semantic-layer              # Đẩy API vào namespace 'semantic-layer'
 
   # ==============================================================================
   # CHÍNH SÁCH ĐỒNG BỘ TỰ ĐỘNG (SYNC POLICY)
@@ -29,4 +30,4 @@ spec:
       prune: true       # Xóa file trên Git -> Tự xóa tài nguyên trên K8s
       selfHeal: true    # Ai táy máy sửa bậy pod trên server -> ArgoCD tự đè lại theo Git
     syncOptions:
-      - CreateNamespace=true  # Tự động tạo namespace 'demo' nếu chưa có
+      - CreateNamespace=true  # Tự động tạo namespace 'semantic-layer' nếu chưa có

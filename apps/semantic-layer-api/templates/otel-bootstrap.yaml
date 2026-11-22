@@ -1,3 +1,4 @@
+{{/* Khi bật tracing, sitecustomize.py được mount vào API để xuất span OTLP tới Tempo. */}}
 {{- if .Values.tracing.enabled }}
 apiVersion: v1
 kind: ConfigMap

@@ -1,4 +1,5 @@
 {{- if .Values.postgres.enabled -}}
+# PostgreSQL dùng local-path PVC trên node K3s; PVC giữ dữ liệu qua lần tạo lại Pod, không thay thế backup.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

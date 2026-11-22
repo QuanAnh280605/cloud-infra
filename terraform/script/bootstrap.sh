@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 ADMIN_EMAIL="${1:-admin@example.com}"
 VPS_IP="${2:-$(curl -s https://api.ipify.org)}"
+# Dừng khi một lệnh lỗi; pipeline curl | sh vẫn cần được kiểm tra riêng.
 set -e
 echo "=========================================================="
 echo "🚀 [1/3] Đang cài đặt K3s (Lightweight Kubernetes)..."
 echo "=========================================================="
+# K3s cài Kubernetes một node; mode 644 cho phép user khác trên VPS đọc kubeconfig.
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644" sh -
 echo "=========================================================="
 echo "⏳ [2/3] Chờ cụm K3s chuyển sang trạng thái Ready..."
@@ -36,6 +38,7 @@ kubectl rollout status deployment/cert-manager-webhook -n cert-manager --timeout
 echo "=========================================================="
 echo "📜 [5/5] Đang tạo ClusterIssuer (Let's Encrypt Production)..."
 echo "=========================================================="
+# HTTP-01 qua Traefik chứng minh quyền kiểm soát host trước khi cấp chứng chỉ TLS.
 cat <<EOF | kubectl apply -f -
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -62,6 +65,7 @@ echo "🔐 [6/7] Đang cài đặt External Secrets Operator (OCI Vault)..."
 echo "=========================================================="
 helm repo add external-secrets https://charts.external-secrets.io
 helm repo update
+# Operator được cài trước khi Argo CD đồng bộ SecretStore/ExternalSecret của API.
 helm upgrade --install external-secrets external-secrets/external-secrets \
     -n external-secrets \
     --create-namespace \
@@ -74,7 +78,7 @@ echo "=========================================================="
 # 1. Tạo namespace và cài ArgoCD
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-# 2. Cấu hình để Ingress Traefik và Cert-Manager xử lý SSL
+# 2. Traefik kết thúc TLS ở Ingress; argocd-server dùng HTTP bên trong cụm.
 kubectl patch configmap argocd-cmd-params-cm -n argocd --type merge -p '{"data":{"server.insecure":"true"}}'
 
 kubectl rollout restart deployment argocd-server -n argocd
@@ -125,6 +129,7 @@ echo "=========================================================="
 echo "=========================================================="
 echo "👑 Đang kích hoạt mô hình App-of-Apps (Root Application)..."
 echo "=========================================================="
+# Root Application theo dõi thư mục chứa các Application con trong Git.
 cat <<EOF | kubectl apply -f -
 apiVersion: argoproj.io/v1alpha1
 kind: Application

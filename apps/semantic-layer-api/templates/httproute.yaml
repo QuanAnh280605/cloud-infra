@@ -1,3 +1,4 @@
+{{/* HTTPRoute là tùy chọn Gateway API; cụm hiện dùng Traefik Ingress nên mặc định tắt. */}}
 {{- if .Values.httpRoute.enabled -}}
 {{- $fullName := include "semantic-layer-api.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}

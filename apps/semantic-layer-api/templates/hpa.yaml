@@ -1,3 +1,4 @@
+{{/* Chỉ tạo HPA khi autoscaling.enabled=true; mặc định hiện tại là false. */}}
 {{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

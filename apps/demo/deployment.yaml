@@ -1,3 +1,4 @@
+# Deployment mẫu chạy hai Pod Nginx để thử khả năng đồng bộ của Argo CD.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

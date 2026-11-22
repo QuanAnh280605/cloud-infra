@@ -1,3 +1,4 @@
+# Argo CD cài Tempo để nhận và lưu distributed traces từ API.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,6 +9,7 @@ metadata:
 spec:
   project: default
   sources:
+    # Chart upstream nhận values tùy biến từ cloud-infra qua ref: values.
     - repoURL: https://grafana.github.io/helm-charts
       chart: tempo
       targetRevision: 1.10.3

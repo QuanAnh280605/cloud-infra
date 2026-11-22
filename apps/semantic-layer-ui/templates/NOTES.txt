@@ -1,3 +1,4 @@
+{{/* Hướng dẫn do Helm in sau khi cài chart; không tạo tài nguyên Kubernetes. */}}
 1. Get the application URL by running these commands:
 {{- if .Values.httpRoute.enabled }}
 {{- if .Values.httpRoute.hostnames }}

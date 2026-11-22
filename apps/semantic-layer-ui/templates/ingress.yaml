@@ -1,3 +1,4 @@
+{{/* Ingress định tuyến host giao diện qua Traefik và dùng TLS Secret do cert-manager cấp. */}}
 {{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress

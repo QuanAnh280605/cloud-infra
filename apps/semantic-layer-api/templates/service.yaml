@@ -1,3 +1,4 @@
+# Service ClusterIP cung cấp địa chỉ ổn định cho Pod API trong cụm; Ingress trỏ tới Service này.
 apiVersion: v1
 kind: Service
 metadata:

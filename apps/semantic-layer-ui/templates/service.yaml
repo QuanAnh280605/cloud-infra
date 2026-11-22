@@ -1,3 +1,4 @@
+# Service ClusterIP ổn định địa chỉ nội bộ của UI để Ingress chuyển request tới Pod.
 apiVersion: v1
 kind: Service
 metadata:

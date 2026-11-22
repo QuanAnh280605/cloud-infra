@@ -1,3 +1,4 @@
+# Argo CD lấy Loki stack từ Helm repo và values riêng từ cloud-infra bằng multi-source.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,12 +9,14 @@ metadata:
 spec:
   project: default
   sources:
+    # Chart upstream cố định phiên bản để bản triển khai có thể tái lập.
     - repoURL: https://grafana.github.io/helm-charts
       chart: loki-stack
       targetRevision: 2.10.2
       helm:
         valueFiles:
           - $values/apps/monitoring/values-loki.yaml
+    # ref: values cho phép chart upstream đọc $values/apps/monitoring/values-loki.yaml.
     - repoURL: https://github.com/QuanAnh280605/cloud-infra.git
       targetRevision: main
       ref: values

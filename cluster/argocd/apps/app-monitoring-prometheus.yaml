@@ -1,3 +1,4 @@
+# Argo CD cài Prometheus Operator, Grafana và Alertmanager từ chart upstream.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,6 +9,7 @@ metadata:
 spec:
   project: default
   sources:
+    # Chart và values nằm ở hai repository khác nhau.
     - repoURL: https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
       targetRevision: 65.5.1
@@ -26,5 +28,5 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      - ServerSideApply=true # CRD lớn của Prometheus được apply phía Kubernetes API server.
 

@@ -1,68 +1,25 @@
-# Default values for semantic-layer-api.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+# Giá trị thực dùng khi Argo CD render chart API; image.tag do CI cập nhật.
 replicaCount: 1
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
   repository: ghcr.io/thanqpham/ai-semantic-layer-backend
-  # This sets the pull policy for images.
   pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
   tag: "919297f"
 
-# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
-# This is to override the chart name.
-nameOverride: ""
-fullnameOverride: ""
-
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+# API dùng ServiceAccount riêng; token được mount theo cấu hình hiện tại.
 serviceAccount:
-  # Specifies whether a service account should be created.
   create: true
-  # Automatically mount a ServiceAccount's API credentials?
   automount: true
-  # Annotations to add to the service account.
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template.
-  name: ""
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-podLabels: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   type: ClusterIP
-  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 8000
 
-# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+# Traefik định tuyến host API; cert-manager cấp TLS qua ClusterIssuer.
 ingress:
   enabled: true
-  className: "traefik"
+  className: traefik
   annotations:
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
   hosts:
@@ -70,57 +27,16 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-  tls: 
+  tls:
     - secretName: backend-tls-secret
       hosts:
         - api.140.245.58.162.nip.io
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
 
-# -- Expose the service via gateway-api HTTPRoute
-# Requires Gateway API resources and suitable controller installed within the cluster
-# (see: https://gateway-api.sigs.k8s.io/guides/)
+# Cụm hiện dùng Ingress thay vì Gateway API HTTPRoute.
 httpRoute:
-  # HTTPRoute enabled.
   enabled: false
-  # HTTPRoute annotations.
-  annotations: {}
-  # Which Gateways this Route is attached to.
-  parentRefs:
-  - name: gateway
-    sectionName: http
-    # namespace: default
-  # Hostnames matching HTTP header.
-  hostnames:
-  - chart-example.local
-  # List of rules and filters applied.
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /headers
-  #   filters:
-  #   - type: RequestHeaderModifier
-  #     requestHeaderModifier:
-  #       set:
-  #       - name: My-Overwrite-Header
-  #         value: this-is-the-only-value
-  #       remove:
-  #       - User-Agent
-  # - matches:
-  #   - path:
-  #       type: PathPrefix
-  #       value: /echo
-  #     headers:
-  #     - name: version
-  #       value: v2
 
 resources:
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   requests:
     cpu: 100m
     memory: 256Mi
@@ -128,7 +44,7 @@ resources:
     cpu: 1000m
     memory: 1024Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# Readiness kiểm tra trước khi nhận request; liveness khởi động lại container lỗi.
 livenessProbe:
   httpGet:
     path: /health
@@ -142,62 +58,35 @@ readinessProbe:
   initialDelaySeconds: 15
   periodSeconds: 5
 
-# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+# Cụm một node đang chạy một Pod API; HPA hiện tắt.
 autoscaling:
   enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-# Additional volumes on the output Deployment definition.
-volumes: []
-  # - name: foo
-  #   secret:
-  #     secretName: mysecret
-  #     optional: false
-
-# Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
-  # - name: foo
-  #   mountPath: "/etc/foo"
-  #   readOnly: true
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
 
 env:
-  appEnv: "production"
-  frontendAppUrl: "https://app.140.245.58.162.nip.io"
-  corsOrigins: "https://app.140.245.58.162.nip.io,http://localhost:3000"
-  llmProvider: "openai"
-  modelName: "gpt-4o-mini"
-  # AI Observability (Input/Output Tracing - Secret keys retrieved securely from OCI Vault)
+  appEnv: production
+  frontendAppUrl: https://app.140.245.58.162.nip.io
+  corsOrigins: https://app.140.245.58.162.nip.io,http://localhost:3000
+  # Khóa Langfuse lấy từ OCI Vault qua ExternalSecret.
   langfuse:
     enabled: true
-    baseUrl: "https://jp.cloud.langfuse.com"
+    baseUrl: https://jp.cloud.langfuse.com
   langchain:
     enabled: false
-    project: "ai-semantic-layer-prod"
 
-# Distributed tracing: OpenTelemetry spans exported to Grafana Tempo.
-# FastAPI instruments itself natively and the image already ships the SDK plus the
-# OTLP/HTTP exporter, so a sitecustomize.py (see templates/otel-bootstrap.yaml)
-# only has to register the tracer provider and the list of paths to skip.
+# API xuất distributed traces qua OTLP/HTTP tới Tempo trong namespace monitoring.
 tracing:
   enabled: true
-  endpoint: "http://monitoring-tempo.monitoring.svc.cluster.local:4318"
+  endpoint: http://monitoring-tempo.monitoring.svc.cluster.local:4318
   samplerRatio: "1.0"
-  excludePaths: "/health,/metrics,/docs,/openapi.json,/redoc"
+  excludePaths: /health,/metrics,/docs,/openapi.json,/redoc
 
+# PostgreSQL một replica dùng PVC local-path; PVC không thay thế sao lưu.
 postgres:
   enabled: true
-  dbName: "semantic_layer"
-  user: "semantic_user"
+  dbName: semantic_layer
+  user: semantic_user
   storage: 15Gi
 
+# ServiceMonitor chỉ được tạo khi API bật endpoint metrics.
 metrics:
   enabled: true

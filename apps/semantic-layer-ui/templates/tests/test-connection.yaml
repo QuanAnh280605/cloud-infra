@@ -1,3 +1,4 @@
+# Helm test chạy Pod tạm để kiểm tra Service UI có thể truy cập trong cụm.
 apiVersion: v1
 kind: Pod
 metadata:
