@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/thanqpham/ai-semantic-layer-backend
   pullPolicy: Always
-  tag: "ffdedb3"
+  tag: "c30d81b"
 
 # API dùng ServiceAccount riêng; token được mount theo cấu hình hiện tại.
 serviceAccount:
