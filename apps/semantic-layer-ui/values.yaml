@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/thanqpham/ai-semantic-layer-frontend
   pullPolicy: Always
-  tag: "919297f"
+  tag: "ffdedb3"
 
 serviceAccount:
   create: true
